@@ -1,0 +1,47 @@
+---
+#   Copyright Red Hat, Inc. All Rights Reserved.
+#   Copyright 2018 Julien Viard de Galbert
+#
+#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+#   not use this file except in compliance with the License. You may obtain
+#   a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#   License for the specific language governing permissions and limitations
+#   under the License.
+#
+#   Author: David Moreau Simard <dms@redhat.com>
+#   https://dmsimard.com/2016/03/15/changing-the-ssh-port-with-ansible/
+#   Author: Julien Viard de Galbert <julien@vdg.name>
+#   Major Changes:
+#     - moved the discovery part to discover_port.yml and detect_port.yml
+#     - reworked the discovery to handle a cached last known working port
+
+# This task list handles connecting to the right SSH port
+
+- name: Check last used SSH port
+  include_tasks: detect_port.yml ssh_detect_port="{{ ssh_last_port }}" ssh_detect_name="cached_last"
+  when: ssh_last_port is defined
+
+- name: Check inventory-provided SSH port
+  include_tasks: detect_port.yml ssh_detect_port="{{ ssh_configured_port }}" ssh_detect_name="configured"
+  when:
+    - ssh_cached_last_port_set is undefined
+
+- name: Check default SSH port
+  include_tasks: detect_port.yml ssh_detect_port="{{ ssh_bootstrap_port }}" ssh_detect_name="default"
+  when:
+    - ssh_cached_last_port_set is undefined
+    - ssh_configured_port_set is undefined
+
+- name: Fail if SSH port was not auto-detected (unknown)
+  fail:
+    msg: "The SSH port is neither {{ (ssh_bootstrap_port, ssh_last_port | default(false)) | select | join(', ') }} or {{ ssh_configured_port }}."
+  when:
+    - ssh_cached_last_port_set is undefined
+    - ssh_configured_port_set is undefined
+    - ssh_default_port_set is undefined

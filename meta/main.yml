@@ -1,0 +1,21 @@
+galaxy_info:
+  author: Julien Viard de Galbert
+  description: Ansible role for ssh idempotent port and user configuration
+  license: Apache2
+  # untested with older version so
+  min_ansible_version: 2.6.1
+  platforms:
+  - name: Debian
+    versions:
+    - stretch
+  - name: Ubuntu
+    versions:
+    - xenial
+    - bionic
+  - name: EL
+    versions:
+    - all
+  galaxy_tags:
+    - security
+    - linux
+    - ssh

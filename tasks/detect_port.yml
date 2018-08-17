@@ -1,0 +1,51 @@
+---
+#   Copyright Red Hat, Inc. All Rights Reserved.
+#   Copyright 2018 Julien Viard de Galbert
+#
+#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+#   not use this file except in compliance with the License. You may obtain
+#   a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#   License for the specific language governing permissions and limitations
+#   under the License.
+#
+#   Author: David Moreau Simard <dms@redhat.com>
+#   https://dmsimard.com/2016/03/15/changing-the-ssh-port-with-ansible/
+#   Author: Julien Viard de Galbert <julien@vdg.name>
+#   Major Changes:
+#     - moved the discovery part to discover_port.yml and detect_port.yml
+#     - reworked the discovery to handle a cached last known working port
+
+# This task list handles detecting if a provided SSH port is potentially correct
+
+- name: Check if we're using the {{ssh_detect_name}} SSH port ({{ ssh_detect_port }})
+  wait_for:
+    port: "{{ ssh_detect_port }}"
+    state: "started"
+    host: "{{ ansible_host }}"
+    connect_timeout: "{{ ssh_detect_connect_timeout }}"
+    timeout: "{{ ssh_detect_timeout }}"
+  delegate_to: "localhost"
+  ignore_errors: "yes"
+  register: ssh_detect
+
+- name: Set inventory ansible_port to {{ssh_detect_name}}
+  set_fact:
+    ansible_port: "{{ ssh_detect_port }}"
+  when: ssh_detect is defined and
+        ssh_detect.state is defined and
+        ssh_detect.state == "started"
+  register: ssh_{{ssh_detect_name}}_port_set
+
+- name: Set cached ssh last used port to {{ssh_detect_name}}
+  set_fact:
+    ssh_last_port: "{{ ssh_detect_port }}"
+    cacheable: yes
+  when: ssh_detect is defined and
+        ssh_detect.state is defined and
+        ssh_detect.state == "started"

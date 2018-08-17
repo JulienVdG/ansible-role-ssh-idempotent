@@ -1,0 +1,124 @@
+---
+#   Copyright Red Hat, Inc. All Rights Reserved.
+#   Copyright 2018 Julien Viard de Galbert
+#
+#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+#   not use this file except in compliance with the License. You may obtain
+#   a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#   License for the specific language governing permissions and limitations
+#   under the License.
+#
+#   Author: David Moreau Simard <dms@redhat.com>
+#   https://dmsimard.com/2016/03/15/changing-the-ssh-port-with-ansible/
+#   Author: Julien Viard de Galbert <julien@vdg.name>
+#   Major Changes:
+#     - moved the discovery part to discover_port.yml and detect_port.yml
+#     - reworked the discovery to handle a cached last known working port
+#     - added similar feature to detect and create the user
+#     - moved the selinux part to hooks/selinux.yml
+
+# This task list handles detecting the current SSH port and User
+# reconfiguring them if needed
+
+# ansible_port can change throughout this role, keep a copy of it
+- name: Set ssh_configured port and user facts
+  set_fact:
+    ssh_configured_port: "{{ ansible_port }}"
+    ssh_configured_user: "{{ ansible_user }}"
+
+- name: Discover SSH port
+  include_tasks: discover_port.yml
+
+- name: Discover SSH user
+  include_tasks: discover_user.yml
+
+- name: Setup alternate SSH port
+  lineinfile:
+    dest: "/etc/ssh/sshd_config"
+    regexp: "^Port"
+    line: "Port {{ ssh_configured_port }}"
+  notify: "Restart sshd"
+  become: yes
+  when: ssh_do_configure_port
+
+- name: Add deploy user
+  user:
+    name: "{{ssh_configured_user}}"
+    password: "{{ssh_deploy_user_password}}"
+    uid: "{{ssh_deploy_user_uid}}"
+    shell: "{{ssh_deploy_user_shell}}"
+    home: "{{ssh_deploy_user_home}}"
+  when:
+    - ssh_do_configure_user
+    - ssh_configured_user != ''
+    - ssh_deploy_user_password is defined
+  become: yes
+
+- name: Add authorized keys for deploy user
+  authorized_key:
+    user: "{{ssh_configured_user}}"
+    key: "{{lookup('file', item)}}"
+  with_items:
+    - "{{ssh_deploy_user_public_keys}}"
+  when:
+    - ssh_do_configure_user
+    - ssh_configured_user != ''
+    - ssh_deploy_user_password is defined
+    - ssh_deploy_user_public_keys is defined
+  become: yes
+
+- name: Add deploy user to sudoers
+  lineinfile:
+    dest: /etc/sudoers
+    regexp: "{{ssh_configured_user}} ALL"
+    line: "{{ssh_configured_user}} ALL=(ALL) NOPASSWD:ALL"
+    state: present
+    validate: 'visudo -cf %s'
+  when:
+    - ssh_do_configure_user
+    - ssh_configured_user != ''
+    - ssh_deploy_user_password is defined
+  become: yes
+
+# Hook external playbook that must ensure both ansible_port and
+# ssh_configured_port are accessible (ie firewall, selinux, apparmor ...)
+- name: Hook external playbook before restarting ssh
+  include_tasks: "{{ item }}"
+  with_items: "{{ ssh_before_restart_hook }}"
+  ssh_port_list: "{{ (ansible_port, ssh_configured_port) | map('int') | unique | list }}"
+
+# We notified "Restart sshd" if we modified the sshd config.
+# By calling flush_handlers, we make sure the handler is run *right now*
+- name: Ensure SSH is reloaded if need be
+  meta: flush_handlers
+
+# We're done, make sure ansible_port and ansible_user are set properly so
+# that any tasks after this use the right ansible_port and ansible_user.
+- name: Ensure we use the configured SSH port/user for the remainder of the role
+  set_fact:
+    ansible_port: "{{ ssh_configured_port }}"
+    ansible_user: "{{ ssh_configured_user }}"
+
+# Sanity check, make sure Ansible is able to connect to the host
+- name: Confirm host connection works
+  ping:
+
+# When caching is enabled (as recommended) update the cached port
+- name: Set cached ssh last used port to the configured SSH port
+  set_fact:
+    ssh_last_port: "{{ ssh_configured_port }}"
+    ssh_last_user: "{{ ssh_configured_user }}"
+    cacheable: yes
+
+# Gather facts should be set to false when running this role since it will
+# fail if the Ansible SSH port is not set correctly.
+# We run setup to gather facts here once the SSH port/connection is set up.
+- name: Run deferred setup to gather facts
+  setup:
+
