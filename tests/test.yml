@@ -1,0 +1,5 @@
+---
+- hosts: host_test
+  gather_facts: no
+  roles:
+    - { role: ansible-role-ssh-idempotent,                     tags: ["ssh"] }
