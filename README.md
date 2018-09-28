@@ -138,6 +138,20 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations
 under the License.
 
+Credits
+-------
+
+I want to credit the following sources that inspired me in writing this module:
+
+- The implementation is based on the technique described in the blog post
+[Changing the SSH port with Ansible](https://dmsimard.com/2016/03/15/changing-the-ssh-port-with-ansible/)
+by David Moreau Simard <dms@redhat.com>.
+
+- The hook idea comes from the article [Adding hooks to your Ansible roles](https://coderwall.com/p/arh7bq/adding-hooks-to-your-ansible-roles)
+by Ramon de la Fuente.
+
+:+1: **Thanks guys !**
+
 Author Information
 ------------------
 
