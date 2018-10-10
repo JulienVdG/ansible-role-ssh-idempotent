@@ -86,6 +86,12 @@
     - ssh_deploy_user_password is defined
   become: yes
 
+# Gather facts should be set to false when running this role since it will
+# fail if the Ansible SSH port is not set correctly.
+# We run setup to gather facts here once the SSH port/connection is set up.
+- name: Run deferred setup to gather facts
+  setup:
+
 # Hook external playbook that must ensure both ansible_port and
 # ssh_configured_port are accessible (ie firewall, selinux, apparmor ...)
 - name: Hook external playbook before restarting ssh
