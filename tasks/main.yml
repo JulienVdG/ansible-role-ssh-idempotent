@@ -95,9 +95,11 @@
 # Hook external playbook that must ensure both ansible_port and
 # ssh_configured_port are accessible (ie firewall, selinux, apparmor ...)
 - name: Hook external playbook before restarting ssh
-  include_tasks: "{{ item }}"
+  include_tasks: "{{ ssh_hook_item }}"
   with_items: "{{ ssh_before_restart_hook }}"
   ssh_port_list: "{{ (ansible_port, ssh_configured_port) | map('int') | unique | list }}"
+  loop_control:
+    loop_var: ssh_hook_item
 
 # We notified "Restart sshd" if we modified the sshd config.
 # By calling flush_handlers, we make sure the handler is run *right now*
