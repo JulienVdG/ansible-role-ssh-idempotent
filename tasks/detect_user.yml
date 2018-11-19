@@ -20,6 +20,7 @@
 - name: Check if we can establish connection with {{ssh_detect_name}} user ({{ ssh_detect_user }})
   local_action: "command ssh -C -o Port={{ ansible_port }} -o KbdInteractiveAuthentication=no -o PreferredAuthentications=gssapi-with-mic,gssapi-keyex,hostbased,publickey -o PasswordAuthentication=no {% if ssh_detect_user != '' %}-o User={{ ssh_detect_user }}{% endif %} {{ ansible_host }} echo OK"
   ignore_errors: True
+  changed_when: false
   register: ssh_detect
 
 - name: Set inventory ansible_user to {{ssh_detect_name}} ({{ ssh_detect_user }})
