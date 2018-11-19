@@ -35,6 +35,9 @@
 - name: Discover SSH port
   include_tasks: discover_port.yml
 
+- name: Update known_hosts
+  include_tasks: update_known_hosts.yml
+
 - name: Discover SSH user
   include_tasks: discover_user.yml
 
@@ -91,7 +94,8 @@
 - name: Hook external playbook before restarting ssh
   include_tasks: "{{ item }}"
   with_items: "{{ ssh_before_restart_hook }}"
-  ssh_port_list: "{{ (ansible_port, ssh_configured_port) | map('int') | unique | list }}"
+  vars:
+    ssh_port_list: "{{ (ansible_port, ssh_configured_port) | map('int') | unique | list }}"
 
 # We notified "Restart sshd" if we modified the sshd config.
 # By calling flush_handlers, we make sure the handler is run *right now*
@@ -108,6 +112,9 @@
 # Sanity check, make sure Ansible is able to connect to the host
 - name: Confirm host connection works
   ping:
+
+- name: Update known_hosts
+  include_tasks: update_known_hosts.yml
 
 # When caching is enabled (as recommended) update the cached port
 - name: Set cached ssh last used port to the configured SSH port
