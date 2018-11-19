@@ -91,7 +91,8 @@
 - name: Hook external playbook before restarting ssh
   include_tasks: "{{ item }}"
   with_items: "{{ ssh_before_restart_hook }}"
-  ssh_port_list: "{{ (ansible_port, ssh_configured_port) | map('int') | unique | list }}"
+  vars:
+    ssh_port_list: "{{ (ansible_port, ssh_configured_port) | map('int') | unique | list }}"
 
 # We notified "Restart sshd" if we modified the sshd config.
 # By calling flush_handlers, we make sure the handler is run *right now*

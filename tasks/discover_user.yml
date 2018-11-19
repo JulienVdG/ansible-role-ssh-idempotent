@@ -17,16 +17,25 @@
 # This task list handles connecting to the right SSH user
 
 - name: Check last used SSH user
-  include_tasks: detect_user.yml ssh_detect_user="{{ ssh_last_user }}" ssh_detect_name="cached_last"
+  include_tasks: detect_user.yml
+  vars:
+    ssh_detect_user: "{{ ssh_last_user }}"
+    ssh_detect_name: "cached_last"
   when: ssh_last_user is defined
 
 - name: Check inventory-provided SSH user
-  include_tasks: detect_user.yml ssh_detect_user="{{ ssh_configured_user }}" ssh_detect_name="configured"
+  include_tasks: detect_user.yml
+  vars:
+    ssh_detect_user: "{{ ssh_configured_user }}"
+    ssh_detect_name: "configured"
   when:
     - ssh_cached_last_user_set is undefined
 
 - name: Check default SSH user
-  include_tasks: detect_user.yml ssh_detect_user="{{ ssh_bootstrap_user }}" ssh_detect_name="default"
+  include_tasks: detect_user.yml
+  vars:
+    ssh_detect_user: "{{ ssh_bootstrap_user }}"
+    ssh_detect_name: "default"
   when:
     - ssh_cached_last_user_set is undefined
     - ssh_configured_user_set is undefined
