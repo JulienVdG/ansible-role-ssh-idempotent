@@ -1,0 +1,37 @@
+---
+- name: Set host portion for known_hosts
+  set_fact:
+    host_portion: "{% if ansible_port == '22' %}{{ ansible_host }}{% else %}[{{ ansible_host }}]:{{ ansible_port }}{% endif %}"
+
+- name: Search for key in known_hosts for {{ ansible_host }}:{{ ansible_port }}
+  ignore_errors: yes
+  changed_when: false
+  local_action: command ssh-keygen -q -F{{ host_portion }}
+  register: is_known_host
+
+- name: Gather ECDSA key for {{ ansible_host }}:{{ ansible_port }}
+  local_action: command ssh-keyscan -tecdsa -p{{ ansible_port }} {{ ansible_host }}
+  register: ssh_keyscan
+  when: is_known_host.rc != 0
+
+- name: Add key for {{ ansible_host }}:{{ ansible_port }}
+  local_action:
+    module: known_hosts
+    name: "{{ host_portion }}"
+    key: "{{ ssh_keyscan.stdout }}"
+    hash_host: yes
+  when:
+    - is_known_host.rc != 0
+    - ssh_keyscan.stdout != ""
+
+- name: Remove key for {{ ansible_host }}:22 if ansible_port is not 22
+  ignore_errors: yes
+  local_action:
+    module: known_hosts
+    name: "{{ ansible_host }}"
+    state: absent
+  when:
+    - ssh_keyscan is defined
+    - ssh_keyscan.stdout is defined
+    - ssh_keyscan.stdout != ""
+    - ansible_port != "22"

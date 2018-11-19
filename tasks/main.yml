@@ -35,6 +35,9 @@
 - name: Discover SSH port
   include_tasks: discover_port.yml
 
+- name: Update known_hosts
+  include_tasks: update_known_hosts.yml
+
 - name: Discover SSH user
   include_tasks: discover_user.yml
 
@@ -109,6 +112,9 @@
 # Sanity check, make sure Ansible is able to connect to the host
 - name: Confirm host connection works
   ping:
+
+- name: Update known_hosts
+  include_tasks: update_known_hosts.yml
 
 # When caching is enabled (as recommended) update the cached port
 - name: Set cached ssh last used port to the configured SSH port
