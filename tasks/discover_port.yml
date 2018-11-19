@@ -24,16 +24,25 @@
 # This task list handles connecting to the right SSH port
 
 - name: Check last used SSH port
-  include_tasks: detect_port.yml ssh_detect_port="{{ ssh_last_port }}" ssh_detect_name="cached_last"
+  include_tasks: detect_port.yml
+  vars:
+    ssh_detect_port: "{{ ssh_last_port }}"
+    ssh_detect_name: "cached_last"
   when: ssh_last_port is defined
 
 - name: Check inventory-provided SSH port
-  include_tasks: detect_port.yml ssh_detect_port="{{ ssh_configured_port }}" ssh_detect_name="configured"
+  include_tasks: detect_port.yml
+  vars:
+    ssh_detect_port: "{{ ssh_configured_port }}"
+    ssh_detect_name: "configured"
   when:
     - ssh_cached_last_port_set is undefined
 
 - name: Check default SSH port
-  include_tasks: detect_port.yml ssh_detect_port="{{ ssh_bootstrap_port }}" ssh_detect_name="default"
+  include_tasks: detect_port.yml
+  vars:
+    ssh_detect_port: "{{ ssh_bootstrap_port }}"
+    ssh_detect_name: "default"
   when:
     - ssh_cached_last_port_set is undefined
     - ssh_configured_port_set is undefined

@@ -97,7 +97,8 @@
 - name: Hook external playbook before restarting ssh
   include_tasks: "{{ ssh_hook_item }}"
   with_items: "{{ ssh_before_restart_hook }}"
-  ssh_port_list: "{{ (ansible_port, ssh_configured_port) | map('int') | unique | list }}"
+  vars:
+    ssh_port_list: "{{ (ansible_port, ssh_configured_port) | map('int') | unique | list }}"
   loop_control:
     loop_var: ssh_hook_item
 
