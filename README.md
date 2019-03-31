@@ -43,8 +43,8 @@ The role use the inventory `ansible_port` and `ansible_user` as target configura
 
 `ansible_user`: user to be configured as connection user.
                 default to empty, in that case don't configure the user.
-                The empty string means let ssh configuration to it's job and
-                connect as current user would.
+                The empty string means let ssh configuration do it's job and
+                connect as current user would (ie. use `.ssh/config`).
 
 
 `ssh_bootstrap_port`: default to 22, port to try if `ansible_port` fail.
@@ -69,7 +69,8 @@ configured)
                          within the hook.
 
 `ssh_do_configure_user`: default to true, when false the user will not be
-                         created, you must do it within the hook.
+                         created, it must either already exists or you have
+			 to create it within the hook.
 
 
 `ssh_deploy_user_password`: default UNDEFINED, to create the user you MUST
@@ -124,7 +125,7 @@ disabled after the role has run)
 License
 -------
 
-Copyright 2018 Julien Viard de Galbert
+Copyright 2018-2019 Julien Viard de Galbert
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may
 not use this file except in compliance with the License. You may obtain
