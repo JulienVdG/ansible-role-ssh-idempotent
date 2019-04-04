@@ -70,8 +70,15 @@ configured)
 
 `ssh_do_configure_user`: default to true, when false the user will not be
                          created, it must either already exists or you have
-			 to create it within the hook.
+                         to create it within the hook.
 
+`ssh_do_discover_port`: default to true, when false the ssh port will not be
+                        detected. To use with `ssh_do_configure_port:false` to
+                        skip port change (ie when using the default)
+
+`ssh_do_discover_user`: default to true, when false the ssh user will not be
+                        detected. To use with `ssh_do_configure_user:false` to
+                        skip user change (ie when not adding one)
 
 `ssh_deploy_user_password`: default UNDEFINED, to create the user you MUST
                             define this variable to the encrypted password

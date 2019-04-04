@@ -30,5 +30,8 @@ ssh_before_restart_hook: "{{ role_path ~ '/hooks/empty.yml' }}"
 # todo in readme
 #ssh_before_restart_hook: "{{ role_path ~ '/hooks/selinux.yml' }}"
 
+ssh_do_discover_port: true
+ssh_do_discover_user: true
+
 ssh_do_configure_port: true
 ssh_do_configure_user: true

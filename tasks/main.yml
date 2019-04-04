@@ -34,9 +34,11 @@
 
 - name: Discover SSH port
   include_tasks: discover_port.yml
+  when: ssh_do_discover_port
 
 - name: Discover SSH user
   include_tasks: discover_user.yml
+  when: ssh_do_discover_user
 
 - name: Setup alternate SSH port
   lineinfile:
