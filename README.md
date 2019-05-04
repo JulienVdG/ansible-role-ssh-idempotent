@@ -35,8 +35,6 @@ hook to create the user yourself (see variables bellow).
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
-
 The role use the inventory `ansible_port` and `ansible_user` as target configuration but will use `ssh_bootstrap_port` and `ssh_bootstrap_user` as fallback when the port/user is not yet configured.
 
 `ansible_port`: used by the role as the target to configure the ssh port
