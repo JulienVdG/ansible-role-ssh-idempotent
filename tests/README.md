@@ -46,7 +46,7 @@ ok: [test_host] => {
 ### Results
 
 It should:
- - connect to your host using previously configured port ans user,
+ - connect to your host using previously configured port and user,
  - the task `Show ssh_port_list in hook` should display:
 ```
 ok: [test_host] => {
@@ -82,4 +82,24 @@ ok: [test_host] => {
 }
 ```
  - not change anything else.
+
+## Test4 : unreachable
+
+### Update
+
+Shutdown your VM or update the `inventory` file and change the host to an inexisting one.
+
+### Launch
+
+    ansible-playbook -i inventory test.yml
+
+### Results
+
+It should:
+ - try to connect to the configured and bootstrap ports (failure ignored)
+ - fail with an unreachable error:
+```
+PLAY RECAP ****************************************************************************
+test_host                  : ok=6    changed=0    unreachable=1    failed=0   
+```
 
