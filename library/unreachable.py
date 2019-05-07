@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # (c) 2019, Julien Viard de Galbert <julien@vdg.name>
 #
 # This file is based on 'fail.py' form ansible core
