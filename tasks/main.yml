@@ -51,26 +51,26 @@
 
 - name: Add deploy user
   user:
-    name: "{{ssh_configured_user}}"
-    password: "{{ssh_deploy_user_password}}"
-    uid: "{{ssh_deploy_user_uid}}"
-    shell: "{{ssh_deploy_user_shell}}"
-    home: "{{ssh_deploy_user_home}}"
+    name: "{{ ssh_configured_user }}"
+    password: "{{ ssh_deploy_user_password }}"
+    uid: "{{ ssh_deploy_user_uid }}"
+    shell: "{{ ssh_deploy_user_shell }}"
+    home: "{{ ssh_deploy_user_home }}"
   when:
     - ssh_do_configure_user
-    - ssh_configured_user != ''
+    - ssh_configured_user != '' # noqa 602
     - ssh_deploy_user_password is defined
   become: yes
 
 - name: Add authorized keys for deploy user
   authorized_key:
-    user: "{{ssh_configured_user}}"
-    key: "{{lookup('file', item)}}"
+    user: "{{ ssh_configured_user }}"
+    key: "{{ lookup('file', item) }}"
   with_items:
-    - "{{ssh_deploy_user_public_keys}}"
+    - "{{ ssh_deploy_user_public_keys }}"
   when:
     - ssh_do_configure_user
-    - ssh_configured_user != ''
+    - ssh_configured_user != '' # noqa 602
     - ssh_deploy_user_password is defined
     - ssh_deploy_user_public_keys is defined
   become: yes
@@ -78,13 +78,13 @@
 - name: Add deploy user to sudoers
   lineinfile:
     dest: /etc/sudoers
-    regexp: "{{ssh_configured_user}} ALL"
-    line: "{{ssh_configured_user}} ALL=(ALL) NOPASSWD:ALL"
+    regexp: "{{ ssh_configured_user }} ALL"
+    line: "{{ ssh_configured_user }} ALL=(ALL) NOPASSWD:ALL"
     state: present
     validate: 'visudo -cf %s'
   when:
     - ssh_do_configure_user
-    - ssh_configured_user != ''
+    - ssh_configured_user != '' # noqa 602
     - ssh_deploy_user_password is defined
   become: yes
 

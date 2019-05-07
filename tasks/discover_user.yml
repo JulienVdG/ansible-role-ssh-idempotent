@@ -42,7 +42,7 @@
 
 - name: Fail if SSH user was not auto-detected (unknown)
   fail:
-    msg: "The SSH user with become right is neither {{ (ssh_bootstrap_user | default('<current user ssh config>',True) , ssh_last_user | default(false)) | select | join(', ') }} or {{ ssh_configured_user | default('<current user ssh config>',True) }}."
+    msg: "The SSH user with become right is neither {{ (ssh_bootstrap_user | default('<current user ssh config>',True) , ssh_last_user | default(false)) | select | join(', ') }} or {{ ssh_configured_user | default('<current user ssh config>',True) }}." # noqa 204
   when:
     - ssh_cached_last_user_set is undefined
     - ssh_configured_user_set is undefined

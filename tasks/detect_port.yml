@@ -23,7 +23,7 @@
 
 # This task list handles detecting if a provided SSH port is potentially correct
 
-- name: Check if we're using the {{ssh_detect_name}} SSH port ({{ ssh_detect_port }})
+- name: Check if we're using the {{ ssh_detect_name }} SSH port ({{ ssh_detect_port }})
   wait_for:
     port: "{{ ssh_detect_port }}"
     state: "started"
@@ -34,15 +34,15 @@
   ignore_errors: "yes"
   register: ssh_detect
 
-- name: Set inventory ansible_port to {{ssh_detect_name}}
+- name: Set inventory ansible_port to {{ ssh_detect_name }}
   set_fact:
     ansible_port: "{{ ssh_detect_port }}"
   when: ssh_detect is defined and
         ssh_detect.state is defined and
         ssh_detect.state == "started"
-  register: ssh_{{ssh_detect_name}}_port_set
+  register: ssh_{{ ssh_detect_name }}_port_set
 
-- name: Set cached ssh last used port to {{ssh_detect_name}}
+- name: Set cached ssh last used port to {{ ssh_detect_name }}
   set_fact:
     ssh_last_port: "{{ ssh_detect_port }}"
     cacheable: yes

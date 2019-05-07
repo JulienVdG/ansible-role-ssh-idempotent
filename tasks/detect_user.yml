@@ -17,33 +17,34 @@
 # This task list handles detecting if a provided SSH user is correct
 
 
-- name: Check if we can establish connection with {{ssh_detect_name}} user ({{ ssh_detect_user }})
-  local_action: "command ssh -C -o Port={{ ansible_port }} -o KbdInteractiveAuthentication=no -o PreferredAuthentications=gssapi-with-mic,gssapi-keyex,hostbased,publickey -o PasswordAuthentication=no {% if ssh_detect_user != '' %}-o User={{ ssh_detect_user }}{% endif %} {{ ansible_host }} echo OK"
+- name: Check if we can establish connection with {{ ssh_detect_name }} user ({{ ssh_detect_user }})
+  command: "ssh -C -o Port={{ ansible_port }} -o KbdInteractiveAuthentication=no -o PreferredAuthentications=gssapi-with-mic,gssapi-keyex,hostbased,publickey -o PasswordAuthentication=no {% if ssh_detect_user %}-o User={{ ssh_detect_user }}{% endif %} {{ ansible_host }} echo OK" # noqa 204
+  delegate_to: localhost
   ignore_errors: True
   changed_when: false
   register: ssh_detect
 
-- name: Set inventory ansible_user to {{ssh_detect_name}} ({{ ssh_detect_user }})
+- name: Set inventory ansible_user to {{ ssh_detect_name }} ({{ ssh_detect_user }})
   set_fact:
     ansible_user: "{{ ssh_detect_user }}"
   when: ssh_detect is defined and
-        ssh_detect.stderr == '' and
+        not ssh_detect.stderr and
         ssh_detect.stdout == 'OK'
 
-- name: Check become with {{ssh_detect_name}} user ({{ ssh_detect_user }})
+- name: Check become with {{ ssh_detect_name }} user ({{ ssh_detect_user }})
   ping:
   become: yes
   ignore_errors: True
   register: ssh_detect
   when: ssh_detect is defined and
-        ssh_detect.stderr == '' and
+        not ssh_detect.stderr and
         ssh_detect.stdout == 'OK'
 
-- name: Set cached ssh last used user to {{ssh_detect_name}}
+- name: Set cached ssh last used user to {{ ssh_detect_name }}
   set_fact:
     ssh_last_user: "{{ ssh_detect_user }}"
     cacheable: yes
   when: ssh_detect is defined and
         ssh_detect.failed is defined and
-        ssh_detect.failed == False
-  register: ssh_{{ssh_detect_name}}_user_set
+        not ssh_detect.failed
+  register: ssh_{{ ssh_detect_name }}_user_set
