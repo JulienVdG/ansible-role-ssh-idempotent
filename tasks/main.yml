@@ -43,7 +43,7 @@
 - name: Setup alternate SSH port
   lineinfile:
     dest: "/etc/ssh/sshd_config"
-    regexp: "^Port"
+    regexp: "^#?Port "
     line: "Port {{ ssh_configured_port }}"
   notify: "Restart sshd"
   become: yes
@@ -119,6 +119,7 @@
 # Sanity check, make sure Ansible is able to connect to the host
 - name: Confirm host connection works
   ping:
+  become: yes
 
 # When caching is enabled (as recommended) update the cached port
 - name: Set cached ssh last used port to the configured SSH port
@@ -132,4 +133,18 @@
 # We run setup to gather facts here once the SSH port/connection is set up.
 - name: Run deferred setup to gather facts
   setup:
+
+- name: Ensure sshd_config setting
+  vars:
+    sshd_resolved_settings: '{{ sshd_default_settings | combine(sshd_settings) | combine(sshd_group_settings) | combine(sshd_host_settings) }}'
+  lineinfile:
+    dest: "/etc/ssh/sshd_config"
+    regexp: "^#?{{ item }} "
+    line: "{{ item }} {{ sshd_resolved_settings[item] }}"
+    state: "present"
+  become: yes
+  notify: "Restart sshd"
+  with_items:
+    - "{{ sshd_resolved_settings | list }}"
+  when: ssh_do_update_settings
 

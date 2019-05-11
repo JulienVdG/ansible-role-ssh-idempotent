@@ -97,6 +97,29 @@ ssh_deploy_user_public_keys:
   - "{{ lookup('env','HOME') ~ '/.ssh/id_rsa.pub' }}"
 ```
 
+`ssh_do_update_settings`: default to true, update the sshd configuration file.
+
+`sshd_default_settings`: Set of configuration values to update in sshd config.
+
+DO NOT USE THIS FOR THE PORT, USE `ansible_port` INSTEAD
+
+```
+sshd_default_settings:
+  "PasswordAuthentication": "no"  # Disable password authentication
+  "PermitRootLogin": "no"         # Disable SSH root login
+  "PermitTunnel": "no"            # Disable tun(4) device forwarding
+
+```
+
+The 3 following variables are merged with `sshd_default_settings` to build the final setting applied to the host.
+
+`sshd_settings` : This variable allows updating the default settings for all hosts.
+
+`sshd_group_settings` : This variable should be set for a group to update the settings for that group.
+
+`sshd_host_settings` : This variable should be set for a host to update the settings for that host.
+
+
 Example Playbook
 ----------------
 

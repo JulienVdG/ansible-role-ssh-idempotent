@@ -35,3 +35,14 @@ ssh_do_discover_user: true
 
 ssh_do_configure_port: true
 ssh_do_configure_user: true
+
+ssh_do_update_settings: true
+
+sshd_default_settings:
+  "PasswordAuthentication": "no"  # Disable password authentication
+  "PermitRootLogin": "no"         # Disable SSH root login
+  "PermitTunnel": "no"            # Disable tun(4) device forwarding
+
+sshd_settings: {}
+sshd_group_settings: {}
+sshd_host_settings: {}
